@@ -1,0 +1,12 @@
+.claude/
+video/src-*.mp4
+video/0-idle.mp4
+frames/leap/
+frames/fall/
+frames/back/
+frames/land/
+img/*.png
+img/1-spire.webp
+img/2-fall.webp
+ПРОМПТЫ.md
+АНИМАЦИЯ.md

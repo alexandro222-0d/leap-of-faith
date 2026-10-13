@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Прыжок веры</title>
+<meta name="description" content="Фан-сайт об Assassin's Creed: прокрути колесо мыши и соверши прыжок веры.">
+<link rel="preload" as="image" href="img/4-front.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Forum&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- высота страницы = длина прыжка -->
+<div id="track"></div>
+
+<div class="stage" id="stage">
+  <div id="cam">
+    <canvas id="scene"></canvas>
+    <!-- цикл на главном экране (клип 0) — включается в main.js, когда появится видео -->
+    <video id="idle" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video>
+  </div>
+
+  <div class="rays" id="rays"></div>
+  <canvas id="fx"></canvas>
+  <div class="grade"></div>
+  <div class="flash" id="flash"></div>
+
+  <!-- тонкая шкала синхронизации справа -->
+  <div class="sync reveal" style="--d:2.3s" aria-hidden="true"><i id="syncFill"></i></div>
+
+  <!-- Текст по ходу прыжка: data-in / data-out — доля прокрутки.
+       Панели .beat — «моменты»: пока такая панель видна, кадр слегка размывается. -->
+  <section class="panel intro" data-in="-1" data-out=".05">
+    <div>
+      <h1 id="title">Прыжок веры</h1>
+    </div>
+  </section>
+
+  <section class="panel beat" data-in=".17" data-out=".30">
+    <div>
+      <p class="line">Ничто не истинно.</p>
+      <p class="line">Всё дозволено.</p>
+    </div>
+  </section>
+
+  <section class="panel beat" data-in=".44" data-out=".58">
+    <div>
+      <p class="kicker">Прыжок веры</p>
+      <p class="text">Ассасин поднимается на самую высокую точку города, чтобы увидеть его целиком, и спускается одним шагом: раскинув руки, спиной вперёд, в стог сена. Без верёвки и без права на ошибку — только вера в Кредо.</p>
+    </div>
+  </section>
+
+  <section class="panel beat" data-in=".64" data-out=".76">
+    <div>
+      <p class="kicker">Кредо</p>
+      <p class="line small">Не обагряй клинок кровью невинного.</p>
+      <p class="line small">Скрывайся у всех на виду.</p>
+      <p class="line small">Не подвергай Братство опасности.</p>
+    </div>
+  </section>
+
+  <section class="panel final" data-in=".88" data-out="2">
+    <div>
+      <h2>Мы работаем во тьме, чтобы служить свету.</h2>
+    </div>
+  </section>
+
+  <div class="hint reveal" style="--d:2.6s" id="hint" aria-label="Крути колесо мыши">
+    <span class="mouse"><i></i></span>
+  </div>
+
+  <p class="legal" id="legal">Неофициальный фан-сайт. Assassin's Creed — товарный знак Ubisoft.</p>
+
+  <div class="curtain" id="curtain"><span></span></div>
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>
