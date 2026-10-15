@@ -82,17 +82,26 @@
       setTimeout(res, ms);
     });
 
+  // главный экран показываем, как только готов цикл; прыжок докачивается в фоне.
+  // Пока он качается, видео подгружается кусками по ходу прокрутки, а когда скачано
+  // целиком — тихо переключаемся на копию в памяти.
   async function loadMedia() {
     el.idle.src = SRC.idle;
     el.idle.play().catch(() => {});
+    el.leap.preload = 'auto';
+    el.leap.src = SRC.leap;
+    await Promise.all([once(el.idle, 'loadeddata', 4000), once(el.leap, 'loadedmetadata', 4000)]);
+  }
+
+  async function loadLeapToMemory() {
     const url = await fetchWithProgress(SRC.leap, (k) => {
-      el.loadPct.textContent = Math.round(k * 100) + '%';
+      el.loadPct.textContent = `Загрузка прыжка ${Math.round(k * 100)}%`;
     });
+    const t = el.leap.currentTime;
     el.leap.src = url;
-    el.leap.load();
     await once(el.leap, 'loadeddata', 8000);
-    el.leap.pause();
-    el.leap.currentTime = 0;
+    el.leap.currentTime = t;
+    el.loadPct.textContent = '';
   }
 
   /* ================= эффекты: пыль и линии скорости ================= */
@@ -266,6 +275,7 @@
     n.addEventListener('animationend', () => n.classList.remove('reveal'), { once: true }));
 
   loadMedia().finally(() => {
+    loadLeapToMemory().catch(() => { el.loadPct.textContent = ''; });
     scrollTo(0, 0);
     readScroll();
     introStart = performance.now() / 1000;

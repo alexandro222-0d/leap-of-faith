@@ -126,16 +126,6 @@ body {
   background: #0d0a10;
   transition: opacity 1.8s ease .2s, visibility 0s linear 2s;
 }
-.curtain #loadPct {
-  position: absolute;
-  top: calc(50% + 18px);
-  left: 0;
-  right: 0;
-  text-align: center;
-  font: 400 13px/1 "Cormorant Garamond", serif;
-  letter-spacing: .3em;
-  color: var(--gold);
-}
 .curtain span {
   width: 120px;
   height: 1px;
@@ -418,6 +408,18 @@ body {
   animation: wheel 1.6s ease-in-out infinite;
 }
 @keyframes wheel { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(12px); opacity: 0; } 100% { opacity: 0; } }
+
+/* фоновая загрузка прыжка — маленькая строка внизу справа */
+.bg-load {
+  position: absolute;
+  right: 24px;
+  bottom: 22px;
+  font-size: 12px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: rgba(246, 236, 218, .6);
+  pointer-events: none;
+}
 
 .legal {
   position: absolute;
