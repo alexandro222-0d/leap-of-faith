@@ -34,19 +34,16 @@ body {
   inset: -2%;
   will-change: transform;
 }
-#scene, #idle {
+#cam video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
 }
-/* видео только источник для холста; само не показывается */
-#idle {
-  width: 2px;
-  height: 2px;
-  opacity: 0;
-  pointer-events: none;
-}
+#leap { will-change: filter, transform; }
+#idle { will-change: opacity; }
 
 #fx {
   position: absolute;
@@ -128,6 +125,16 @@ body {
   place-items: center;
   background: #0d0a10;
   transition: opacity 1.8s ease .2s, visibility 0s linear 2s;
+}
+.curtain #loadPct {
+  position: absolute;
+  top: calc(50% + 18px);
+  left: 0;
+  right: 0;
+  text-align: center;
+  font: 400 13px/1 "Cormorant Garamond", serif;
+  letter-spacing: .3em;
+  color: var(--gold);
 }
 .curtain span {
   width: 120px;

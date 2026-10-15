@@ -10,3 +10,8 @@ img/1-spire.webp
 img/2-fall.webp
 ПРОМПТЫ.md
 АНИМАЦИЯ.md
+# старые версии: сайт теперь работает на одном ролике video/leap*.mp4
+frames/
+img/
+video/0-idle*.mp4
+video/src*.mp4
