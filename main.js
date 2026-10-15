@@ -19,7 +19,7 @@
   const T = {
     start: 0.03,   // начало прыжка
     end: 0.97,     // ролик доигран
-    impact: 0.735, // удар в стог: 7,5 с из 10 с ролика
+    impact: 0.78,  // удар в стог: 11,35 с из 14,2 с ролика
   };
 
   /* ================= утилиты ================= */
@@ -205,7 +205,7 @@
     mouse.y += (mouse.ty - mouse.y) * (1 - Math.pow(0.02, dt));
 
     // ролик
-    const dur = el.leap.duration || 10;
+    const dur = el.leap.duration || 14.2;
     seekLeap(seg(p, T.start, T.end) * (dur - 0.05));
 
     // цикл на карнизе растворяется в начале прыжка
@@ -245,7 +245,7 @@
     el.hint.style.visibility = p > 0.04 ? 'hidden' : 'visible';
     if (document.body.classList.contains('ready')) el.hint.style.opacity = r2(1 - seg(p, 0.003, 0.03));
     el.legal.style.opacity = r2(seg(p, 0.95, 1));
-    document.documentElement.style.setProperty('--endShade', r2(seg(p, 0.77, 0.81)));
+    document.documentElement.style.setProperty('--endShade', r2(seg(p, 0.81, 0.85)));
 
     for (const pn of el.panels) {
       const a = +pn.dataset.in, b = +pn.dataset.out;
