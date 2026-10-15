@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Forum&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
@@ -20,6 +20,8 @@
   <div id="cam">
     <!-- прыжок: одно видео, каждый кадр ключевой — колесо мыши перематывает его -->
     <video id="leap" muted playsinline preload="none" aria-hidden="true"></video>
+    <!-- качественная версия: докачивается в фоне и плавно подменяет лёгкую -->
+    <video id="leapHi" muted playsinline preload="none" aria-hidden="true"></video>
     <!-- цикл на главном экране, растворяется в начале прыжка -->
     <video id="idle" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video>
   </div>
@@ -40,21 +42,21 @@
     </div>
   </section>
 
-  <section class="panel beat" data-in=".14" data-out=".24">
+  <section class="panel beat" data-in=".12" data-out=".20">
     <div>
       <p class="line">Ничто не истинно.</p>
       <p class="line">Всё дозволено.</p>
     </div>
   </section>
 
-  <section class="panel beat" data-in=".27" data-out=".37">
+  <section class="panel beat" data-in=".22" data-out=".30">
     <div>
       <p class="kicker">Прыжок веры</p>
       <p class="text">Ассасин поднимается на самую высокую точку города, чтобы увидеть его целиком, и спускается одним шагом: раскинув руки, спиной вперёд, в стог сена. Без верёвки и без права на ошибку — только вера в Кредо.</p>
     </div>
   </section>
 
-  <section class="panel beat" data-in=".40" data-out=".48">
+  <section class="panel beat" data-in=".32" data-out=".40">
     <div>
       <p class="kicker">Кредо</p>
       <p class="line small">Не обагряй клинок кровью невинного.</p>
@@ -63,7 +65,7 @@
     </div>
   </section>
 
-  <section class="panel final" data-in=".82" data-out="2">
+  <section class="panel final" data-in=".87" data-out="2">
     <div>
       <h2>Мы работаем во тьме, чтобы служить свету.</h2>
     </div>
@@ -79,6 +81,6 @@
   <p class="bg-load" id="loadPct" aria-live="polite"></p>
 </div>
 
-<script src="main.js"></script>
+<script src="main.js?v=4"></script>
 </body>
 </html>

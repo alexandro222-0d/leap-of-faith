@@ -11,15 +11,17 @@
      ===================================================================== */
   const PHONE = innerHeight > innerWidth;
   const SRC = {
-    idle: PHONE ? 'video/idle2-m.mp4' : 'video/idle2.mp4',
-    leap: PHONE ? 'video/leap-m.mp4' : 'video/leap.mp4',
+    idle: PHONE ? 'video/idle2-m.mp4?v=4' : 'video/idle2.mp4?v=4',
+    // лёгкая версия (~1,5 МБ) — с ней прыжок начинается; качественная докачивается в фоне
+    lo: PHONE ? 'video/leap-lo-m.mp4?v=4' : 'video/leap-lo.mp4?v=4',
+    hi: PHONE ? 'video/leap-m.mp4?v=4' : 'video/leap.mp4?v=4',
   };
 
   // ключевые моменты прокрутки (доля от 0 до 1)
   const T = {
     start: 0.03,   // начало прыжка
     end: 0.97,     // ролик доигран
-    impact: 0.78,  // удар в стог: 11,35 с из 14,2 с ролика
+    impact: 0.83,  // удар в стог: 14 с из 16,4 с ролика
   };
 
   /* ================= утилиты ================= */
@@ -34,6 +36,7 @@
   const el = {
     cam: $('#cam'),
     leap: $('#leap'),
+    leapHi: $('#leapHi'),
     idle: $('#idle'),
     fx: $('#fx'),
     rays: $('#rays'),
@@ -82,26 +85,37 @@
       setTimeout(res, ms);
     });
 
-  // главный экран показываем, как только готов цикл; прыжок докачивается в фоне.
-  // Пока он качается, видео подгружается кусками по ходу прокрутки, а когда скачано
-  // целиком — тихо переключаемся на копию в памяти.
+  // Главный экран показываем сразу. Прыжок начинается, только когда лёгкая версия
+  // ролика целиком в памяти — тогда перемотка никогда не ждёт сеть. Пока она
+  // качается, герой стоит на карнизе, внизу видны проценты.
+  let leapReady = false;
+  let active = el.leap;
+
   async function loadMedia() {
     el.idle.src = SRC.idle;
     el.idle.play().catch(() => {});
-    el.leap.preload = 'auto';
-    el.leap.src = SRC.leap;
-    await Promise.all([once(el.idle, 'loadeddata', 4000), once(el.leap, 'loadedmetadata', 4000)]);
+    await once(el.idle, 'loadeddata', 4000);
   }
 
-  async function loadLeapToMemory() {
-    const url = await fetchWithProgress(SRC.leap, (k) => {
-      el.loadPct.textContent = `Загрузка прыжка ${Math.round(k * 100)}%`;
+  async function loadVideoToMemory(node, url, label) {
+    const blob = await fetchWithProgress(url, (k) => {
+      if (label) el.loadPct.textContent = `${label} ${Math.round(k * 100)}%`;
     });
-    const t = el.leap.currentTime;
-    el.leap.src = url;
-    await once(el.leap, 'loadeddata', 8000);
-    el.leap.currentTime = t;
+    node.src = blob;
+    await once(node, 'loadeddata', 8000);
+    node.pause();
+  }
+
+  async function loadLeap() {
+    await loadVideoToMemory(el.leap, SRC.lo, 'Загрузка прыжка');
+    leapReady = true;
     el.loadPct.textContent = '';
+    // качественная версия: когда скачана, ставим её на тот же кадр и проявляем поверх
+    await loadVideoToMemory(el.leapHi, SRC.hi, '');
+    el.leapHi.currentTime = el.leap.currentTime;
+    await once(el.leapHi, 'seeked', 2000);
+    active = el.leapHi;
+    el.leapHi.classList.add('on');
   }
 
   /* ================= эффекты: пыль и линии скорости ================= */
@@ -177,16 +191,16 @@
 
   let p = 0, prevP = 0, last = performance.now();
   let landed = false, shake = 0, flash = 0;
-  let wantTime = 0;
-
   // перемотка: новый кадр запрашиваем, только когда предыдущий уже показан
+  let wantTime = 0;
   function seekLeap(time) {
     wantTime = time;
-    const v = el.leap;
+    const v = active;
     if (v.readyState < 1 || v.seeking) return;
-    if (Math.abs(v.currentTime - time) > 0.5 / 30) v.currentTime = time;
+    if (Math.abs(v.currentTime - time) > 0.25 / 24) v.currentTime = time;
   }
   el.leap.addEventListener('seeked', () => seekLeap(wantTime));
+  el.leapHi.addEventListener('seeked', () => seekLeap(wantTime));
 
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
@@ -194,6 +208,8 @@
     const t = now / 1000;
 
     if (debugP !== null) target = debugP;
+    // пока ролик не в памяти — герой стоит на карнизе
+    if (!leapReady) target = Math.min(target, T.start);
     // плавное «догоняние» прокрутки — без рывков от колеса мыши
     p += (target - p) * (1 - Math.pow(0.004, dt));
     if (Math.abs(target - p) < 1e-5) p = target;
@@ -205,7 +221,7 @@
     mouse.y += (mouse.ty - mouse.y) * (1 - Math.pow(0.02, dt));
 
     // ролик
-    const dur = el.leap.duration || 14.2;
+    const dur = active.duration || 16.4;
     seekLeap(seg(p, T.start, T.end) * (dur - 0.05));
 
     // цикл на карнизе растворяется в начале прыжка
@@ -216,7 +232,9 @@
 
     // лёгкий блюр и притемнение в «моменты» с текстом
     const beat = beatAmount(p);
-    el.leap.style.filter = beat > 0.01 ? `blur(${r2(beat * 3)}px) brightness(${r2(1 - beat * 0.4)})` : 'none';
+    const filt = beat > 0.01 ? `blur(${r2(beat * 3)}px) brightness(${r2(1 - beat * 0.4)})` : 'none';
+    el.leap.style.filter = filt;
+    el.leapHi.style.filter = filt;
 
     // удар в стог
     if (!landed && p >= T.impact) {
@@ -245,7 +263,7 @@
     el.hint.style.visibility = p > 0.04 ? 'hidden' : 'visible';
     if (document.body.classList.contains('ready')) el.hint.style.opacity = r2(1 - seg(p, 0.003, 0.03));
     el.legal.style.opacity = r2(seg(p, 0.95, 1));
-    document.documentElement.style.setProperty('--endShade', r2(seg(p, 0.81, 0.85)));
+    document.documentElement.style.setProperty('--endShade', r2(seg(p, 0.86, 0.9)));
 
     for (const pn of el.panels) {
       const a = +pn.dataset.in, b = +pn.dataset.out;
@@ -275,7 +293,7 @@
     n.addEventListener('animationend', () => n.classList.remove('reveal'), { once: true }));
 
   loadMedia().finally(() => {
-    loadLeapToMemory().catch(() => { el.loadPct.textContent = ''; });
+    loadLeap().catch(() => { el.loadPct.textContent = ''; leapReady = true; });
     scrollTo(0, 0);
     readScroll();
     introStart = performance.now() / 1000;

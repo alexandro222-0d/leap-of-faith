@@ -42,7 +42,9 @@ body {
   object-fit: cover;
   object-position: 50% 45%;
 }
-#leap { will-change: filter, transform; }
+#leap, #leapHi { will-change: filter, opacity; }
+#leapHi { opacity: 0; transition: opacity .4s; }
+#leapHi.on { opacity: 1; }
 #idle { will-change: opacity; }
 
 #fx {
