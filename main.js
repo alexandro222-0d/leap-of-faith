@@ -11,8 +11,8 @@
      ===================================================================== */
   const PHONE = innerHeight > innerWidth;
   const SRC = {
-    idle: PHONE ? 'video/idle2-m.mp4' : 'video/idle2.mp4',
-    leap: PHONE ? 'video/leap-m.mp4' : 'video/leap.mp4',
+    idle: PHONE ? 'video/idle2-m.mp4?v=5' : 'video/idle2.mp4?v=5',
+    leap: PHONE ? 'video/leap-m.mp4?v=5' : 'video/leap.mp4?v=5',
   };
 
   // ключевые моменты прокрутки (доля от 0 до 1)
