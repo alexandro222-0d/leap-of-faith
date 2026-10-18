@@ -43,6 +43,7 @@
     legal: $('#legal'),
     title: $('#title'),
     loadPct: $('#loadPct'),
+    curtainPct: $('#curtainPct'),
     panels: [...document.querySelectorAll('.panel')],
   };
 
@@ -85,9 +86,29 @@
   // главный экран показываем, как только готов цикл; прыжок докачивается в фоне.
   // Пока он качается, видео подгружается кусками по ходу прокрутки, а когда скачано
   // целиком — тихо переключаемся на копию в памяти.
+  // iPhone не показывает кадры при перемотке, пока видео хоть раз не запущено
+  async function prime(v) {
+    try { await v.play(); v.pause(); } catch (e) { /* автозапуск запрещён — повторим по касанию */ }
+  }
+
   async function loadMedia() {
     el.idle.src = SRC.idle;
     el.idle.play().catch(() => {});
+    if (PHONE) {
+      try {
+        el.leap.src = await fetchWithProgress(SRC.leap, (k) => {
+          el.curtainPct.textContent = `Загрузка ${Math.round(k * 100)}%`;
+        });
+      } catch (e) {
+        el.leap.src = SRC.leap;
+      }
+      el.leap.preload = 'auto';
+      await once(el.leap, 'loadeddata', 10000);
+      await prime(el.leap);
+      el.leap.currentTime = 0;
+      el.curtainPct.textContent = '';
+      return;
+    }
     el.leap.preload = 'auto';
     el.leap.src = SRC.leap;
     await Promise.all([once(el.idle, 'loadeddata', 4000), once(el.leap, 'loadedmetadata', 4000)]);
@@ -268,6 +289,16 @@
   resize();
   readScroll();
   addEventListener('scroll', readScroll, { passive: true });
+  addEventListener('touchstart', () => {
+    if (el.idle.paused && el.idle.src) el.idle.play().catch(() => {});
+    if (el.leap.readyState >= 1) prime(el.leap);
+  }, { once: true, passive: true });
+  // подсказка: на телефоне не колёсико мыши, а «листай вниз»
+  if (PHONE || matchMedia('(hover: none)').matches) {
+    el.hint.classList.add('touch');
+    el.hint.setAttribute('aria-label', 'Листай вниз');
+    el.hint.innerHTML = '<span class="swipe"><i></i></span><span class="lbl">Листай вниз</span>';
+  }
   addEventListener('resize', () => { resize(); readScroll(); });
 
   // после анимации появления отдаём прозрачность обратно скрипту
@@ -275,7 +306,7 @@
     n.addEventListener('animationend', () => n.classList.remove('reveal'), { once: true }));
 
   loadMedia().finally(() => {
-    loadLeapToMemory().catch(() => { el.loadPct.textContent = ''; });
+    if (!PHONE) loadLeapToMemory().catch(() => { el.loadPct.textContent = ''; });
     scrollTo(0, 0);
     readScroll();
     introStart = performance.now() / 1000;

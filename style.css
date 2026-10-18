@@ -133,6 +133,41 @@ body {
   animation: load 1.2s ease-in-out infinite;
 }
 @keyframes load { 0%, 100% { opacity: .2; transform: scaleX(.3); } 50% { opacity: 1; transform: scaleX(1); } }
+.curtain b {
+  position: absolute;
+  top: calc(50% + 22px);
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: rgba(246, 236, 218, .65);
+}
+
+/* подсказка для телефона: стрелка вниз */
+.hint.touch { gap: 8px; }
+.hint.touch .lbl { font-size: 11px; letter-spacing: .3em; }
+.swipe {
+  position: relative;
+  width: 2px;
+  height: 34px;
+  background: linear-gradient(transparent, rgba(246, 236, 218, .85));
+}
+.swipe i {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-right: 2px solid var(--gold);
+  border-bottom: 2px solid var(--gold);
+  transform: rotate(45deg);
+  animation: swipe 1.6s ease-in-out infinite;
+}
+@keyframes swipe { 0% { translate: 0 -10px; opacity: 0; } 40% { opacity: 1; } 100% { translate: 0 4px; opacity: 0; } }
 .ready .curtain { opacity: 0; visibility: hidden; }
 
 /* ---------- появление при загрузке ---------- */
