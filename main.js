@@ -86,6 +86,27 @@
   // главный экран показываем, как только готов цикл; прыжок докачивается в фоне.
   // Пока он качается, видео подгружается кусками по ходу прокрутки, а когда скачано
   // целиком — тихо переключаемся на копию в памяти.
+  const ready = (v, ms) =>
+    new Promise((res) => {
+      if (v.readyState >= 2) return res('ok');
+      const ok = () => { clean(); res('ok'); };
+      const bad = () => { clean(); res('err'); };
+      const clean = () => { v.removeEventListener('loadeddata', ok); v.removeEventListener('error', bad); };
+      v.addEventListener('loadeddata', ok);
+      v.addEventListener('error', bad);
+      setTimeout(() => { clean(); res(v.readyState >= 2 ? 'ok' : 'timeout'); }, ms);
+    });
+
+  // ставим ролик из памяти, а если браузер (Safari) его не открыл — по обычной ссылке, он уже в кэше
+  async function setLeapSource(blobUrl) {
+    if (blobUrl) {
+      el.leap.src = blobUrl;
+      if ((await ready(el.leap, 8000)) === 'ok') return;
+    }
+    el.leap.src = SRC.leap;
+    await ready(el.leap, 10000);
+  }
+
   // iPhone не показывает кадры при перемотке, пока видео хоть раз не запущено
   async function prime(v) {
     try { await v.play(); v.pause(); } catch (e) { /* автозапуск запрещён — повторим по касанию */ }
@@ -95,15 +116,14 @@
     el.idle.src = SRC.idle;
     el.idle.play().catch(() => {});
     if (PHONE) {
+      let blob = null;
       try {
-        el.leap.src = await fetchWithProgress(SRC.leap, (k) => {
+        blob = await fetchWithProgress(SRC.leap, (k) => {
           el.curtainPct.textContent = `Загрузка ${Math.round(k * 100)}%`;
         });
-      } catch (e) {
-        el.leap.src = SRC.leap;
-      }
+      } catch (e) { /* не скачалось — возьмём по ссылке */ }
       el.leap.preload = 'auto';
-      await once(el.leap, 'loadeddata', 10000);
+      await setLeapSource(blob);
       await prime(el.leap);
       el.leap.currentTime = 0;
       el.curtainPct.textContent = '';
@@ -119,8 +139,7 @@
       el.loadPct.textContent = `Загрузка прыжка ${Math.round(k * 100)}%`;
     });
     const t = el.leap.currentTime;
-    el.leap.src = url;
-    await once(el.leap, 'loadeddata', 8000);
+    await setLeapSource(url);
     el.leap.currentTime = t;
     el.loadPct.textContent = '';
   }
